@@ -22,8 +22,8 @@
 
 ## Step 3: Frontend Foundation
 **Prompt:**
-"Read `04_frontend_components.md`.
-Write boilerplate: `src/api/axios.js` (with JWT), `src/context/AuthContext.jsx`, `src/App.jsx`."
+"Acts as a Senior React Devloper. Read `04_frontend_components.md`. 
+Write boilerplate: `src/api/axios.js` (with JWT hybrid approach: refresh token in cookies, get a new token when needed via response body of /refresh), `src/context/AuthContext.jsx`, `src/App.jsx`."
 
 ## Step 4: Frontend UI Features
 **Prompt:**
