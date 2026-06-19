@@ -8,6 +8,11 @@ class InvitationAPITests(APITestCase):
     """Тести для API запрошень."""
 
     def setUp(self):
+        self.token_url = "/api/auth/token/"
+        self.register_url = "/api/auth/register/"
+        self.invite_url = "/api/invites/"
+        self.accept_invite_url = "/api/invites/accept/"
+
         self.client = APIClient()
 
         self.user1 = User.objects.create_user(
@@ -17,24 +22,28 @@ class InvitationAPITests(APITestCase):
             username="user2", email="user2@example.com", password="pass123"
         )
 
+        self.client1 = APIClient()
+        self.client2 = APIClient()
+
         token_response1 = self.client.post(
-            "/api/auth/token/", {"username": "user1", "password": "pass123"}
+            self.token_url, {"username": "user1", "password": "pass123"}
         )
         token_response2 = self.client.post(
-            "/api/auth/token/", {"username": "user2", "password": "pass123"}
+            self.token_url, {"username": "user2", "password": "pass123"}
         )
 
         self.token1 = token_response1.data["access"]
         self.token2 = token_response2.data["access"]
 
+        self.client1.credentials(HTTP_AUTHORIZATION=f"Bearer {self.token1}")
+        self.client2.credentials(HTTP_AUTHORIZATION=f"Bearer {self.token2}")
+
     def test_create_invitation_success(self):
         """Успішне створення запрошення."""
 
-        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.token1}")
-
         data = {"recipient_email": "user2@example.com"}
 
-        response = self.client.post("/api/invites/", data, format="json")
+        response = self.client1.post(self.invite_url, data, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data["recipient_email"], "user2@example.com")
@@ -44,11 +53,7 @@ class InvitationAPITests(APITestCase):
     def test_create_invitation_without_email(self):
         """Помилка при відсутності email."""
 
-        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.token1}")
-
-        data = {}
-
-        response = self.client.post("/api/invites/", data, format="json")
+        response = self.client1.post(self.invite_url, {}, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -57,7 +62,7 @@ class InvitationAPITests(APITestCase):
 
         data = {"recipient_email": "user2@example.com"}
 
-        response = self.client.post("/api/invites/", data, format="json")
+        response = self.client.post(self.invite_url, data, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
@@ -68,9 +73,7 @@ class InvitationAPITests(APITestCase):
             recipient_email="user2@example.com", sender=self.user1
         )
 
-        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.token2}")
-
-        response = self.client.post(f"/api/invites/accept/{invitation.token}/")
+        response = self.client2.post(f"{self.accept_invite_url}{invitation.token}/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -86,18 +89,18 @@ class InvitationAPITests(APITestCase):
             username="user3", email="user3@example.com", password="pass123"
         )
 
-        token_response = self.client.post(
-            "/api/auth/token/", {"username": "user3", "password": "pass123"}
+        client3 = APIClient()
+        token_resp3 = client3.post(
+            self.token_url, {"username": "user3", "password": "pass123"}
         )
-        token3 = token_response.data["access"]
+        token3 = token_resp3.data["access"]
+        client3.credentials(HTTP_AUTHORIZATION=f"Bearer {token3}")
 
         invitation = Invitation.objects.create(
             recipient_email="user2@example.com", sender=self.user1
         )
 
-        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {token3}")
-
-        response = self.client.post(f"/api/invites/accept/{invitation.token}/")
+        response = client3.post(f"{self.accept_invite_url}{invitation.token}/")
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -108,19 +111,15 @@ class InvitationAPITests(APITestCase):
             recipient_email="user2@example.com", sender=self.user1, is_accepted=True
         )
 
-        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.token2}")
-
-        response = self.client.post(f"/api/invites/accept/{invitation.token}/")
+        response = self.client2.post(f"{self.accept_invite_url}{invitation.token}/")
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_accept_nonexistent_invitation(self):
         """Помилка при прийнятті неіснуючого запрошення."""
 
-        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.token2}")
-
-        response = self.client.post(
-            "/api/invites/accept/00000000-0000-0000-0000-000000000000/"
+        response = self.client2.post(
+            f"{self.accept_invite_url}00000000-0000-0000-0000-000000000000/"
         )
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
@@ -132,6 +131,6 @@ class InvitationAPITests(APITestCase):
             recipient_email="user2@example.com", sender=self.user1
         )
 
-        response = self.client.post(f"/api/invites/accept/{invitation.token}/")
+        response = self.client.post(f"{self.accept_invite_url}{invitation.token}/")
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
