@@ -58,11 +58,6 @@ class TokenRefreshCookieView(APIView):
     def post(self, request):
         refresh = request.COOKIES.get("refresh")
 
-        if not refresh:
-            return Response(
-                {"detail": "refresh token missing"}, status=status.HTTP_400_BAD_REQUEST
-            )
-
         serializer = TokenRefreshSerializer(data={"refresh": refresh})
 
         serializer.is_valid(raise_exception=True)
@@ -89,8 +84,6 @@ class TokenLogoutView(APIView):
 
 
 class MeView(APIView):
-    permission_classes = [IsAuthenticated]
-
     def get(self, request):
         return Response(UserSerializer(request.user).data)
 
@@ -100,7 +93,6 @@ class UserProfileViewSet(viewsets.ReadOnlyModelViewSet):
 
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
-    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         """Повертає профіль тільки поточного користувача."""

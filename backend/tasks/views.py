@@ -3,9 +3,10 @@ from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.exceptions import NotFound
 from .models import Task, Invitation
 from .serializers import TaskSerializer, InvitationSerializer
-from . import services as task_services
+from .services import create_invitation, accept_invitation
 
 
 class TaskViewSet(viewsets.ModelViewSet):
@@ -13,7 +14,6 @@ class TaskViewSet(viewsets.ModelViewSet):
 
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
-    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         """Повертає завдання користувача та спільні завдання."""
@@ -37,8 +37,6 @@ class TaskViewSet(viewsets.ModelViewSet):
 class CreateInvitationView(APIView):
     """Представлення для створення запрошення."""
 
-    permission_classes = [IsAuthenticated]
-
     def post(self, request):
         """Створює запрошення для завдання."""
 
@@ -49,7 +47,7 @@ class CreateInvitationView(APIView):
         receipient_email = serializer.validated_data["recipient_email"]
 
         try:
-            invitation = task_services.create_invitation(
+            invitation = create_invitation(
                 sender=request.user, recipient_email=receipient_email
             )
 
@@ -63,20 +61,16 @@ class CreateInvitationView(APIView):
 class AcceptInvitationView(APIView):
     """Представлення для прийняття запрошення."""
 
-    permission_classes = [IsAuthenticated]
-
     def post(self, request, token):
         """Приймає запрошення та створює спільний доступ."""
 
         try:
-            task_services.accept_invitation(user=request.user, token=token)
+            accept_invitation(user=request.user, token=token)
 
             return Response(
-                {"detail": "Запрошення прийнято."}, status=status.HTTP_200_OK
+                {"detail": "invitation accepted"}, status=status.HTTP_200_OK
             )
         except Invitation.DoesNotExist:
-            return Response(
-                {"detail": "Запрошення не знайдено."}, status=status.HTTP_404_NOT_FOUND
-            )
+            raise NotFound("invitation not found")
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
