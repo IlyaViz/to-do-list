@@ -18,6 +18,7 @@ const Register = () => {
 
   const handle = (e) => {
     e.preventDefault();
+
     const form = new FormData(e.target);
 
     registerMut({
@@ -30,7 +31,7 @@ const Register = () => {
 
   const getError = () => {
     if (error?.response?.data?.detail) {
-      return formatError(error, "Registration failed");
+      return <p>{formatError(error, "Registration failed")}</p>;
     }
 
     return formatFieldErrors(error, "Registration failed");
@@ -40,7 +41,7 @@ const Register = () => {
     <form onSubmit={handle} className="p-6 max-w-md flex flex-col items-center">
       <h2 className="text-lg font-medium">Register</h2>
 
-      {isError && <p className="text-red-600">{getError()}</p>}
+      {isError && <p className="text-red-600 text-center whitespace-pre-line">{getError()}</p>}
 
       <label className="block mt-3">
         Username

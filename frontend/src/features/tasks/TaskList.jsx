@@ -16,8 +16,6 @@ const TaskList = () => {
     queryFn: getTasks,
   });
 
-  console.log(currentUser.username);
-
   if (isLoading) return <p className="mt-4">Loading tasks…</p>;
 
   if (isError)
