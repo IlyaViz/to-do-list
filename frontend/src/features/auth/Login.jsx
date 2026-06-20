@@ -1,34 +1,42 @@
-import { useContext, useState } from "react";
-import { AuthContext } from "../../context/AuthContext";
+import { useContext } from "react";
 import { useNavigate } from "react-router";
+import { useMutation } from "@tanstack/react-query";
+import { AuthContext } from "../../context/AuthContext";
 
 const Login = () => {
-  const [error, setError] = useState(null);
-
   const { login } = useContext(AuthContext);
 
   const navigate = useNavigate();
+
+  const {
+    mutate: loginMutation,
+    isPending,
+    isError,
+    error,
+  } = useMutation({
+    mutationFn: login,
+    onSuccess: () => {
+      navigate("/dashboard");
+    },
+  });
 
   const handle = async (e) => {
     e.preventDefault();
 
     const form = new FormData(e.target);
 
-    try {
-      await login({
-        username: form.get("username"),
-        password: form.get("password"),
-      });
-      navigate("/dashboard");
-    } catch (err) {
-      setError("Login failed");
-    }
+    loginMutation({
+      username: form.get("username"),
+      password: form.get("password"),
+    });
   };
 
   return (
     <form onSubmit={handle} className="p-6 max-w-md flex flex-col items-center">
       <h2 className="text-lg font-medium">Login</h2>
-      {error && <p className="text-red-600">{error}</p>}
+
+      {isError && <p className="text-red-600">{error.response.data.detail}</p>}
+
       <label className="block mt-3">
         Username
         <input
@@ -38,6 +46,7 @@ const Login = () => {
           className="block mt-1 w-full"
         />
       </label>
+
       <label className="block mt-3">
         Password
         <input
@@ -47,7 +56,13 @@ const Login = () => {
           className="block mt-1 w-full"
         />
       </label>
-      <button className="mt-4 px-3 py-2 bg-blue-600 text-white">Sign in</button>
+
+      <button
+        className="mt-4 px-3 py-2 bg-blue-600 text-white"
+        disabled={isPending}
+      >
+        {isPending ? "Signing in..." : "Sign in"}
+      </button>
     </form>
   );
 };

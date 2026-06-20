@@ -4,35 +4,63 @@ import { updateTask, deleteTask } from "./tasksApi";
 const TaskItem = ({ task }) => {
   const qc = useQueryClient();
 
-  const toggleMut = useMutation({
+  const {
+    mutate: toggleMutate,
+    isPending: isTogglePending,
+    isError: isToggleError,
+    error: toggleError,
+  } = useMutation({
     mutationFn: () => updateTask(task.id, { is_completed: !task.is_completed }),
-    onSuccess: () => qc.invalidateQueries(["tasks"]),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["tasks"] }),
   });
 
-  const deleteMut = useMutation({
+  const {
+    mutate: deleteMutate,
+    isPending: isDeletePending,
+    isError: isDeleteError,
+    error: deleteError,
+  } = useMutation({
     mutationFn: () => deleteTask(task.id),
-    onSuccess: () => qc.invalidateQueries(["tasks"]),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["tasks"] }),
   });
 
-  const toggle = () => toggleMut.mutate();
+  const toggle = () => toggleMutate();
 
   const remove = () => {
     if (!confirm("Delete task?")) return;
 
-    deleteMut.mutate();
+    deleteMutate();
   };
 
   return (
     <li className="flex items-center justify-between py-2">
       <label>
-        <input type="checkbox" checked={task.is_completed} onChange={toggle} />
+        <input
+          type="checkbox"
+          checked={task.is_completed}
+          onChange={toggle}
+          disabled={isTogglePending}
+        />
         <span className={`ml-2 ${task.is_completed ? "line-through" : ""}`}>
           {task.title}
         </span>
       </label>
-      <button onClick={remove} className="text-red-600">
-        Delete
-      </button>
+      <div className="flex items-center gap-2">
+        <button
+          onClick={remove}
+          className="text-red-600"
+          disabled={isDeletePending}
+        >
+          {isDeletePending ? "Deleting..." : "Delete"}
+        </button>
+        {(isToggleError || isDeleteError) && (
+          <p className="text-red-600">
+            {toggleError?.response?.data?.detail ||
+              deleteError?.response?.data?.detail ||
+              "Action failed"}
+          </p>
+        )}
+      </div>
     </li>
   );
 };

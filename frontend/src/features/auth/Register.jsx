@@ -1,35 +1,37 @@
-import { useState } from "react";
 import { useNavigate } from "react-router";
-import { register as apiRegister } from "./authApi";
+import { useMutation } from "@tanstack/react-query";
+import { register } from "./authApi";
 
 const Register = () => {
-  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  const handle = async (e) => {
-    e.preventDefault();
+  const {
+    mutate: registerMut,
+    isPending,
+    isError,
+    error,
+  } = useMutation({
+    mutationFn: register,
+    onSuccess: () => navigate("/login"),
+  });
 
+  const handle = (e) => {
+    e.preventDefault();
     const form = new FormData(e.target);
 
-    try {
-      await apiRegister({
-        username: form.get("username"),
-        email: form.get("email"),
-        password: form.get("password"),
-        password_confirm: form.get("password_confirm"),
-      });
-      
-      navigate("/login");
-    } catch (err) {
-      setError("Registration failed");
-    }
+    registerMut({
+      username: form.get("username"),
+      email: form.get("email"),
+      password: form.get("password"),
+      passwordConfirm: form.get("password_confirm"),
+    });
   };
 
   return (
-    <form onSubmit={handle} className="p-6 max-w-md">
+    <form onSubmit={handle} className="p-6 max-w-md flex flex-col items-center">
       <h2 className="text-lg font-medium">Register</h2>
 
-      {error && <p className="text-red-600">{error}</p>}
+      {isError && <p className="text-red-600">{error.response.data.detail}</p>}
 
       <label className="block mt-3">
         Username
@@ -66,8 +68,11 @@ const Register = () => {
         />
       </label>
 
-      <button className="mt-4 px-3 py-2 bg-green-600 text-white">
-        Register
+      <button
+        className="mt-4 px-3 py-2 bg-green-600 text-white"
+        disabled={isPending}
+      >
+        {isPending ? "Registering..." : "Register"}
       </button>
     </form>
   );
