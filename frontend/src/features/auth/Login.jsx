@@ -2,6 +2,7 @@ import { useContext } from "react";
 import { useNavigate } from "react-router";
 import { useMutation } from "@tanstack/react-query";
 import { AuthContext } from "../../context/AuthContext";
+import { formatError } from "../../utils/formatError";
 
 const Login = () => {
   const { login } = useContext(AuthContext);
@@ -35,7 +36,9 @@ const Login = () => {
     <form onSubmit={handle} className="p-6 max-w-md flex flex-col items-center">
       <h2 className="text-lg font-medium">Login</h2>
 
-      {isError && <p className="text-red-600">{error.response.data.detail}</p>}
+      {isError && (
+        <p className="text-red-600">{formatError(error, "Login failed")}</p>
+      )}
 
       <label className="block mt-3">
         Username

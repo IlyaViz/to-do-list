@@ -6,6 +6,7 @@ import Register from "./features/auth/Register";
 import Dashboard from "./features/dashboard/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import GuestRoute from "./components/GuestRoute";
+import AcceptInvite from "./features/invites/AcceptInvite";
 
 const router = createBrowserRouter([
   {
@@ -14,7 +15,10 @@ const router = createBrowserRouter([
     children: [
       {
         element: <ProtectedRoute />,
-        children: [{ path: "dashboard", element: <Dashboard /> }],
+        children: [
+          { path: "dashboard", element: <Dashboard /> },
+          { path: "accept-invite", element: <AcceptInvite /> },
+        ],
       },
       {
         element: <GuestRoute />,

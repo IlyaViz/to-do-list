@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router";
 import { useMutation } from "@tanstack/react-query";
 import { register } from "./authApi";
+import { formatError, formatFieldErrors } from "../../utils/formatError";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -27,11 +28,19 @@ const Register = () => {
     });
   };
 
+  const getError = () => {
+    if (error?.response?.data?.detail) {
+      return formatError(error, "Registration failed");
+    }
+
+    return formatFieldErrors(error, "Registration failed");
+  };
+
   return (
     <form onSubmit={handle} className="p-6 max-w-md flex flex-col items-center">
       <h2 className="text-lg font-medium">Register</h2>
 
-      {isError && <p className="text-red-600">{error.response.data.detail}</p>}
+      {isError && <p className="text-red-600">{getError()}</p>}
 
       <label className="block mt-3">
         Username

@@ -4,7 +4,7 @@ import ShareModal from "../invites/ShareModal";
 
 const Dashboard = () => {
   return (
-    <div className="p-6">
+    <div className="p-6 flex flex-col items-center">
       <h2 className="text-xl font-semibold">Dashboard</h2>
 
       <div className="mt-4">

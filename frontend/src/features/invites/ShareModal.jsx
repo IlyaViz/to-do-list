@@ -1,7 +1,11 @@
+import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { sendInvite } from "./invitesApi";
+import { formatError } from "../../utils/formatError";
 
 const ShareModal = () => {
+  const [email, setEmail] = useState("");
+
   const {
     mutate: sendMut,
     isPending,
@@ -10,30 +14,29 @@ const ShareModal = () => {
     isSuccess,
   } = useMutation({
     mutationFn: sendInvite,
+    onSuccess: () => {
+      setEmail("");
+    },
   });
 
   const send = (e) => {
     e.preventDefault();
 
-    const form = new FormData(e.target);
-
-    const email = form.get("email");
-
     sendMut(email);
-
-    e.target.reset();
   };
 
   return (
-    <div className="mt-6 p-4 border rounded max-w-md">
+    <div className="mt-6 p-4 border rounded max-w-md flex flex-col items-center">
       <h3 className="font-medium">Share your list</h3>
 
-      <form onSubmit={send} className="mt-2">
+      <form onSubmit={send} className="mt-2 flex flex-col items-center">
         <input
           name="email"
           type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           placeholder="friend@example.com"
-          className="w-full"
+          className="w-full text-center"
           required
         />
 
@@ -50,7 +53,9 @@ const ShareModal = () => {
       {isSuccess && <p className="text-green-600 mt-2">Invitation sent</p>}
 
       {isError && (
-        <p className="text-red-600 mt-2">{error.response.data.detail}</p>
+        <p className="text-red-600 mt-2">
+          {formatError(error, "Failed to send invite")}
+        </p>
       )}
     </div>
   );

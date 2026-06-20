@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createTask } from "./tasksApi";
+import { formatError } from "../../utils/formatError";
 
 const TaskForm = () => {
   const [title, setTitle] = useState("");
@@ -13,7 +14,7 @@ const TaskForm = () => {
     isError,
     error,
   } = useMutation({
-    mutationFn: (payload) => createTask(payload),
+    mutationFn: createTask,
     onSuccess: () => {
       setTitle("");
       qc.invalidateQueries({ queryKey: ["tasks"] });
@@ -46,7 +47,9 @@ const TaskForm = () => {
       </button>
 
       {isError && (
-        <p className="text-red-600 w-full">{error.response.data.detail}</p>
+        <p className="text-red-600 w-full">
+          {formatError(error, "Failed to add task")}
+        </p>
       )}
     </form>
   );

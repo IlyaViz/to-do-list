@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateTask, deleteTask } from "./tasksApi";
+import { formatError } from "../../utils/formatError";
 
 const TaskItem = ({ task }) => {
   const qc = useQueryClient();
@@ -10,7 +11,7 @@ const TaskItem = ({ task }) => {
     isError: isToggleError,
     error: toggleError,
   } = useMutation({
-    mutationFn: () => updateTask(task.id, { is_completed: !task.is_completed }),
+    mutationFn: updateTask,
     onSuccess: () => qc.invalidateQueries({ queryKey: ["tasks"] }),
   });
 
@@ -20,16 +21,14 @@ const TaskItem = ({ task }) => {
     isError: isDeleteError,
     error: deleteError,
   } = useMutation({
-    mutationFn: () => deleteTask(task.id),
+    mutationFn: deleteTask,
     onSuccess: () => qc.invalidateQueries({ queryKey: ["tasks"] }),
   });
-
-  const toggle = () => toggleMutate();
 
   const remove = () => {
     if (!confirm("Delete task?")) return;
 
-    deleteMutate();
+    deleteMutate(task.id);
   };
 
   return (
@@ -38,13 +37,20 @@ const TaskItem = ({ task }) => {
         <input
           type="checkbox"
           checked={task.is_completed}
-          onChange={toggle}
+          onChange={() =>
+            toggleMutate({
+              id: task.id,
+              payload: { is_completed: !task.is_completed },
+            })
+          }
           disabled={isTogglePending}
         />
+
         <span className={`ml-2 ${task.is_completed ? "line-through" : ""}`}>
           {task.title}
         </span>
       </label>
+
       <div className="flex items-center gap-2">
         <button
           onClick={remove}
@@ -53,11 +59,11 @@ const TaskItem = ({ task }) => {
         >
           {isDeletePending ? "Deleting..." : "Delete"}
         </button>
+
         {(isToggleError || isDeleteError) && (
           <p className="text-red-600">
-            {toggleError?.response?.data?.detail ||
-              deleteError?.response?.data?.detail ||
-              "Action failed"}
+            {formatError(toggleError, "Failed to update task")}
+            {formatError(deleteError, "Failed to delete task")}
           </p>
         )}
       </div>

@@ -10,7 +10,7 @@ export const createTask = async (payload) => {
   return resp.data;
 };
 
-export const updateTask = async (id, payload) => {
+export const updateTask = async ({ id, payload }) => {
   const resp = await api.patch(`/tasks/${id}/`, payload);
   return resp.data;
 };

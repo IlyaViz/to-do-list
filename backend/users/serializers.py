@@ -25,8 +25,9 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         """Перевіряє, що паролі збігаються."""
+
         if data.get("password") != data.get("password_confirm"):
-            raise serializers.ValidationError({"password": "Паролі не збігаються"})
+            raise serializers.ValidationError({"password": "passwords do not match"})
 
         return data
 

@@ -5,3 +5,9 @@ export const sendInvite = async (email) => {
 
   return resp.data;
 };
+
+export const acceptInvite = async (token) => {
+  const resp = await api.post(`/invites/accept/${token}/`);
+
+  return resp.data;
+};
