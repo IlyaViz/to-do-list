@@ -83,6 +83,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             set -e
+            
             cd ${{ secrets.SSH_TARGET_DIR }}
 
             echo "${{ secrets.PROD_ENV_FILE }}" > .env
