@@ -26,6 +26,29 @@ class UserRegistrationAPITests(APITestCase):
         self.assertEqual(response.data["username"], "testuser")
         self.assertEqual(User.objects.count(), 1)
 
+    def test_register_user_with_existing_email(self):
+        """Помилка при спробі зареєструвати користувача з існуючим email."""
+
+        data = {
+            "username": "testuser1",
+            "email": "test@example.com",
+            "password": "testpass123",
+            "password_confirm": "testpass123",
+        }
+
+        self.client.post(self.register_url, data, format="json")
+
+        data = {
+            "username": "testuser2",
+            "email": "test@example.com",
+            "password": "testpass123",
+            "password_confirm": "testpass123",
+        }
+
+        response = self.client.post(self.register_url, data, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_register_user_password_mismatch(self):
         """Помилка при невідповідності паролів."""
 
