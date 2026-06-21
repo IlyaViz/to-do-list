@@ -13,7 +13,9 @@ services:
       retries: 10
 
   backend:
-    image: ghcr.io/ilyaviz/to-do-list-backend:latest
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
     restart: unless-stopped
     depends_on:
       db:

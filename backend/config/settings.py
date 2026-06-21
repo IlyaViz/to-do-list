@@ -24,7 +24,7 @@ SECRET_KEY = os.getenv(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DJANGO_DEBUG", "True").lower() == "true"
 
-ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS").split(",")
+ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
 # Application definition
 
@@ -52,6 +52,9 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+if not DEBUG:
+    MIDDLEWARE.append("whitenoise.middleware.WhiteNoiseMiddleware")
 
 ROOT_URLCONF = "config.urls"
 
@@ -123,6 +126,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/6.0/ref/settings/#default-auto-field
@@ -138,20 +142,20 @@ REST_FRAMEWORK = {
 }
 
 # CORS Configuration
-CORS_ALLOWED_ORIGINS = [os.getenv("FRONTEND_ORIGIN")]
+CORS_ALLOWED_ORIGINS = [os.getenv("FRONTEND_ORIGIN", "http://localhost")]
 
 CORS_ALLOW_CREDENTIALS = True
 
 # Email Configuration (для розробки)
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
-FRONTEND_ORIGIN = os.getenv("FRONTEND_ORIGIN")
+FRONTEND_ORIGIN = os.getenv("FRONTEND_ORIGIN", "http://localhost")
 
-EMAIL_HOST = os.getenv("EMAIL_HOST")
-EMAIL_PORT = int(os.getenv("EMAIL_PORT"))
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
-EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS").lower() == "true"
+EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True").lower() == "true"
 
 # Simple JWT Configuration
 SIMPLE_JWT = {
