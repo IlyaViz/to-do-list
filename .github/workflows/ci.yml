@@ -1,0 +1,19 @@
+name: CI — Run tests
+
+on:
+  push:
+    branches: [ main, cicd ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Prepare environment variables
+        run: cp .env.example .env
+
+      - name: Run Django Tests via Docker Compose
+        run: |
+          docker compose -f docker-compose.dev.yml run --rm backend python manage.py test
