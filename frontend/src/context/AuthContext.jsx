@@ -8,16 +8,47 @@ import {
 } from "../features/auth/authApi";
 import { setAccessToken } from "../api/axios";
 
+// eslint-disable-next-line
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [accessToken, setToken] = useState(
     () => localStorage.getItem("accessToken") || null,
   );
-  const [user, setUser] = useState(null);
-  const [ready, setReady] = useState(false);
+  const [isRefreshDone, setIsRefreshDone] = useState(
+    () => !!localStorage.getItem("accessToken"),
+  );
 
   const qc = useQueryClient();
+
+  const { data: userData, isFetched } = useQuery({
+    queryKey: ["me"],
+    queryFn: apiMe,
+    enabled: !!accessToken,
+    retry: false,
+  });
+
+  const { mutateAsync: loginMutAsync } = useMutation({
+    mutationFn: apiLogin,
+    onSuccess: (data) => {
+      if (data?.access) setToken(data.access);
+    },
+  });
+
+  const { mutateAsync: logoutMutAsync } = useMutation({
+    mutationFn: apiLogout,
+    onSuccess: () => {
+      setToken(null);
+      qc.removeQueries({});
+    },
+  });
+
+  const login = async ({ username, password }) =>
+    loginMutAsync({ username, password });
+
+  const logout = async () => logoutMutAsync();
+
+  const user = userData ?? null;
 
   useEffect(() => {
     if (accessToken) {
@@ -29,69 +60,24 @@ export const AuthProvider = ({ children }) => {
     }
   }, [accessToken]);
 
-  const {
-    data: userData,
-    isSuccess,
-    isError,
-  } = useQuery({
-    queryKey: ["me"],
-    queryFn: apiMe,
-    enabled: !!accessToken,
-    retry: false,
-  });
-
-  useEffect(() => {
-    if (isSuccess) {
-      setUser(userData);
-      setReady(true);
-    } else if (isError) {
-      setUser(null);
-      setReady(true);
-    }
-  }, [isSuccess, isError, userData]);
-
   useEffect(() => {
     if (accessToken) return;
 
-    let mounted = true;
-
-    (async () => {
+    const initRefresh = async () => {
       try {
         const data = await apiRefresh();
-
-        if (mounted && data?.access) setToken(data.access);
+        if (data?.access) setToken(data.access);
       } catch (e) {
         console.warn("refresh failed", e);
       } finally {
-        if (mounted) setReady(true);
+        setIsRefreshDone(true);
       }
-    })();
-
-    return () => {
-      mounted = false;
     };
+
+    initRefresh();
   }, []);
 
-  const loginMut = useMutation({
-    mutationFn: apiLogin,
-    onSuccess: (data) => {
-      if (data?.access) setToken(data.access);
-    },
-  });
-
-  const logoutMut = useMutation({
-    mutationFn: apiLogout,
-    onSuccess: () => {
-      setToken(null);
-      setUser(null);
-      qc.removeQueries({});
-    },
-  });
-
-  const login = async ({ username, password }) =>
-    loginMut.mutateAsync({ username, password });
-
-  const logout = async () => logoutMut.mutateAsync();
+  const ready = isRefreshDone && (!accessToken || isFetched);
 
   return (
     <AuthContext.Provider value={{ accessToken, user, login, logout, ready }}>

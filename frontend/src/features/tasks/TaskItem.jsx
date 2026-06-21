@@ -60,9 +60,13 @@ const TaskItem = ({ task }) => {
           {isDeletePending ? "Deleting..." : "Delete"}
         </button>
 
-        {(isToggleError || isDeleteError) && (
+        {isToggleError && (
           <p className="text-red-600">
             {formatError(toggleError, "Failed to update task")}
+          </p>
+        )}
+        {isDeleteError && (
+          <p className="text-red-600">
             {formatError(deleteError, "Failed to delete task")}
           </p>
         )}
