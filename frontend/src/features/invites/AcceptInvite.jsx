@@ -11,7 +11,7 @@ const AcceptInvite = () => {
 
   const {
     mutate: acceptInviteMut,
-    isLoading,
+    isPending,
     error,
   } = useMutation({
     mutationFn: acceptInvite,
@@ -31,9 +31,9 @@ const AcceptInvite = () => {
       <button
         onClick={() => acceptInviteMut(token)}
         className="px-4 py-2 bg-blue-600 text-white rounded"
-        disabled={isLoading}
+        disabled={isPending}
       >
-        {isLoading ? "Accepting..." : "Accept Invite"}
+        {isPending ? "Accepting..." : "Accept Invite"}
       </button>
     </div>
   );

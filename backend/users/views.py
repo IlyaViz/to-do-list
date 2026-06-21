@@ -23,13 +23,16 @@ class RegisterUserView(APIView):
 
         data = serializer.validated_data
 
-        user = create_user(
-            username=data["username"],
-            email=data.get("email", ""),
-            password=data["password"],
-        )
+        try:
+            user = create_user(
+                username=data["username"],
+                email=data.get("email", ""),
+                password=data["password"],
+            )
 
-        return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
+            return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class TokenObtainCookieView(APIView):
