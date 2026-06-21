@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   db:
     image: postgres:17-alpine
@@ -24,6 +22,8 @@ services:
       - .env
     ports:
       - "8000:8000"
+    command: >
+      sh -c 'python manage.py migrate && python manage.py createsuperuser --noinput || true && python manage.py runserver 0.0.0.0:8000'
 
   frontend:
     image: ghcr.io/ilyaviz/to-do-list-frontend:latest
