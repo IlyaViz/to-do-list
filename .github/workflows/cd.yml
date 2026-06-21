@@ -44,7 +44,7 @@ jobs:
           tags: |
             ghcr.io/ilyaviz/to-do-list-frontend:latest
 
-     - name: Setup Server (Docker & Folder)
+      - name: Setup Server (Docker & Folder)
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -61,7 +61,7 @@ jobs:
               sudo usermod -aG docker $USER
               sudo chmod 666 /var/run/docker.sock
             fi
-            
+
             mkdir -p ${{ secrets.SSH_TARGET_DIR }}
 
       - name: Copy docker-compose file to VPS
@@ -84,10 +84,10 @@ jobs:
           script: |
             set -e
             cd ${{ secrets.SSH_TARGET_DIR }}
-            
+
             echo "${{ secrets.PROD_ENV_FILE }}" > .env
-            
+
             echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ilyaviz --password-stdin
-            
+
             docker compose -f docker-compose.prod.yml pull
             docker compose -f docker-compose.prod.yml up -d --remove-orphans
