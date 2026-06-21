@@ -35,7 +35,7 @@ const TaskForm = () => {
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="New task"
-        className="flex-1"
+        className="flex-1 border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-green-400"
         disabled={isPending}
       />
 

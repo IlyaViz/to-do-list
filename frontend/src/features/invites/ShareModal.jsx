@@ -36,7 +36,7 @@ const ShareModal = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="friend@example.com"
-          className="w-full text-center"
+          className="w-full text-center border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-400"
           required
         />
 

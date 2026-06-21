@@ -46,7 +46,7 @@ const Login = () => {
           name="username"
           type="text"
           required
-          className="block mt-1 w-full"
+          className="block mt-1 w-full border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
       </label>
 
@@ -56,7 +56,7 @@ const Login = () => {
           name="password"
           type="password"
           required
-          className="block mt-1 w-full"
+          className="block mt-1 w-full border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
       </label>
 

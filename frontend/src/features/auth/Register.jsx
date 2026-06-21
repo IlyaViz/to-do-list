@@ -45,7 +45,7 @@ const Register = () => {
 
       <label className="block mt-3">
         Username
-        <input name="username" required className="block mt-1 w-full" />
+        <input name="username" required className="block mt-1 w-full border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-400" />
       </label>
 
       <label className="block mt-3">
@@ -54,7 +54,7 @@ const Register = () => {
           name="email"
           type="email"
           required
-          className="block mt-1 w-full"
+          className="block mt-1 w-full border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
       </label>
 
@@ -64,7 +64,7 @@ const Register = () => {
           name="password"
           type="password"
           required
-          className="block mt-1 w-full"
+          className="block mt-1 w-full border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
       </label>
 
@@ -74,7 +74,7 @@ const Register = () => {
           name="password_confirm"
           type="password"
           required
-          className="block mt-1 w-full"
+          className="block mt-1 w-full border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
       </label>
 
