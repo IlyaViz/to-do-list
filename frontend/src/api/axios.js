@@ -24,37 +24,38 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (originalRequest.url.includes("token")) {
+    if (
+      originalRequest.url.includes("token") ||
+      error.response?.status !== 401 ||
+      originalRequest._retry
+    ) {
       return Promise.reject(error);
     }
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
+    originalRequest._retry = true;
 
-      try {
-        const baseURL = import.meta.env.VITE_API_URL;
+    try {
+      const baseURL = import.meta.env.VITE_API_URL;
 
-        const resp = await axios.post(
-          `${baseURL}/auth/token/refresh/`,
-          {},
-          { withCredentials: true },
-        );
+      const resp = await axios.post(
+        `${baseURL}/auth/token/refresh/`,
+        {},
+        { withCredentials: true },
+      );
 
-        const newAccessToken = resp.data?.access;
+      const newAccessToken = resp.data?.access;
 
-        if (newAccessToken) {
-          setAccessToken(newAccessToken);
+      if (newAccessToken) {
+        setAccessToken(newAccessToken);
+        originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
 
-          originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
-
-          return api(originalRequest);
-        }
-      } catch (refreshError) {
-        console.warn("Refresh failed, user needs to login again", refreshError);
-
-        setAccessToken(null);
-        localStorage.removeItem("accessToken");
+        return api(originalRequest);
       }
+    } catch (refreshError) {
+      console.error("token refresh failed", refreshError);
+
+      setAccessToken(null);
+      localStorage.removeItem("accessToken");
 
       return Promise.reject(error);
     }
