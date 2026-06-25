@@ -20,6 +20,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "owner",
             "owner_id",
             "is_overdue",
+            "parent_task",
         ]
         read_only_fields = ["id", "created_at", "owner", "is_overdue"]
 
