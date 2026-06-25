@@ -1,11 +1,12 @@
 from rest_framework import status, viewsets
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.serializers import (
     TokenObtainPairSerializer,
     TokenRefreshSerializer,
 )
+from rest_framework import generics
 from .models import UserProfile
 from .serializers import UserSerializer, RegisterSerializer, UserProfileSerializer
 from .services import create_user
@@ -86,9 +87,11 @@ class TokenLogoutView(APIView):
         return response
 
 
-class MeView(APIView):
-    def get(self, request):
-        return Response(UserSerializer(request.user).data)
+class MeView(generics.RetrieveAPIView):
+    serializer_class = UserSerializer
+
+    def get_object(self):
+        return self.request.user
 
 
 class UserProfileViewSet(viewsets.ReadOnlyModelViewSet):

@@ -1,10 +1,10 @@
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.exceptions import NotFound
-from .models import Task, Invitation
+from .models import Task, Invitation, SharedAccess
 from .serializers import TaskSerializer, InvitationSerializer
 from .services import create_invitation, accept_invitation
 
@@ -74,3 +74,18 @@ class AcceptInvitationView(APIView):
             raise NotFound("invitation not found")
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class DeleteSharedAccessDestroyAPIView(APIView):
+    """Представлення для видалення спільного доступу."""
+
+    def delete(self, request, owner_id):
+        """Видаляє спільний доступ."""
+
+        shared_access = get_object_or_404(
+            SharedAccess, owner_id=owner_id, shared_with=request.user
+        )
+
+        shared_access.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)

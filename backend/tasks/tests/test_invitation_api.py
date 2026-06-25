@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
+from .utils import setup_two_users
 from ..models import SharedAccess, Invitation
 
 
@@ -9,34 +10,12 @@ class InvitationAPITests(APITestCase):
 
     def setUp(self):
         self.token_url = "/api/auth/token/"
-        self.register_url = "/api/auth/register/"
         self.invite_url = "/api/invites/"
         self.accept_invite_url = "/api/invites/accept/"
 
-        self.client = APIClient()
-
-        self.user1 = User.objects.create_user(
-            username="user1", email="user1@example.com", password="pass123"
+        self.client1, self.client2, self.user1, self.user2 = setup_two_users(
+            self.token_url
         )
-        self.user2 = User.objects.create_user(
-            username="user2", email="user2@example.com", password="pass123"
-        )
-
-        self.client1 = APIClient()
-        self.client2 = APIClient()
-
-        token_response1 = self.client.post(
-            self.token_url, {"username": "user1", "password": "pass123"}
-        )
-        token_response2 = self.client.post(
-            self.token_url, {"username": "user2", "password": "pass123"}
-        )
-
-        self.token1 = token_response1.data["access"]
-        self.token2 = token_response2.data["access"]
-
-        self.client1.credentials(HTTP_AUTHORIZATION=f"Bearer {self.token1}")
-        self.client2.credentials(HTTP_AUTHORIZATION=f"Bearer {self.token2}")
 
     def test_create_invitation_success(self):
         """Успішне створення запрошення."""
@@ -90,10 +69,13 @@ class InvitationAPITests(APITestCase):
         )
 
         client3 = APIClient()
+
         token_resp3 = client3.post(
             self.token_url, {"username": "user3", "password": "pass123"}
         )
+
         token3 = token_resp3.data["access"]
+
         client3.credentials(HTTP_AUTHORIZATION=f"Bearer {token3}")
 
         invitation = Invitation.objects.create(

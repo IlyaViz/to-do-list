@@ -15,7 +15,3 @@ def create_user(username: str, email: str, password: str) -> User:
         UserProfile.objects.create(user=user)
 
     return user
-
-
-def get_user_by_username(username: str):
-    return User.objects.filter(username=username).first()
