@@ -12,6 +12,9 @@ class Task(models.Model):
     due_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="tasks")
+    parent_task = models.ForeignKey(
+        "self", on_delete=models.CASCADE, null=True, blank=True, related_name="subtasks"
+    )
 
     class Meta:
         ordering = ["is_completed", "due_at", "-created_at"]
