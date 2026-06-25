@@ -7,10 +7,11 @@ import TaskForm from "./TaskForm";
 
 const TaskItem = ({ task, allTasks }) => {
   const [isAddingSubtask, setIsAddingSubtask] = useState(false);
+  const [isTaskEditing, setIsTaskEditing] = useState(false);
 
   const qc = useQueryClient();
 
-  const { mutate: toggleMutate, isPending: isTogglePending } = useMutation({
+  const { mutate: updateMutate, isPending: isTogglePending } = useMutation({
     mutationFn: updateTask,
     onSuccess: () => qc.invalidateQueries({ queryKey: ["tasks"] }),
     onError: (error) => {
@@ -32,15 +33,25 @@ const TaskItem = ({ task, allTasks }) => {
     deleteMutate(task.id);
   };
 
+  const onTitleUnFocus = (e) => {
+    const newTitle = e.target.value.trim();
+
+    if (newTitle && newTitle !== task.title) {
+      updateMutate({ id: task.id, payload: { title: newTitle } });
+    }
+
+    setIsTaskEditing(false);
+  };
+
   return (
     <li className="flex flex-col items-center justify-between py-2">
-      <div className="flex items-center justify-between w-full">
-        <label>
+      <div className="flex items-center justify-between w-full gap-2">
+        <div className="flex items-center gap-2">
           <input
             type="checkbox"
             checked={task.is_completed}
             onChange={() =>
-              toggleMutate({
+              updateMutate({
                 id: task.id,
                 payload: { is_completed: !task.is_completed },
               })
@@ -48,10 +59,23 @@ const TaskItem = ({ task, allTasks }) => {
             disabled={isTogglePending}
           />
 
-          <span className={`ml-2 ${task.is_completed ? "line-through" : ""}`}>
-            {task.title}
-          </span>
-        </label>
+          {isTaskEditing ? (
+            <input
+              type="text"
+              defaultValue={task.title}
+              onBlur={onTitleUnFocus}
+              onKeyDown={(e) => e.key === "Enter" && e.target.blur()}
+              className="border border-gray-300 rounded px-1 py-0.5 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+          ) : (
+            <span
+              onClick={() => setIsTaskEditing(true)}
+              className="cursor-pointer inline-block max-w-[125px] truncate"
+            >
+              {task.title}
+            </span>
+          )}
+        </div>
 
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-3">
