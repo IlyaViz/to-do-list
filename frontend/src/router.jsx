@@ -1,12 +1,10 @@
 import { createBrowserRouter } from "react-router";
 import App from "./App";
-import Home from "./components/Home";
-import Login from "./features/auth/Login";
-import Register from "./features/auth/Register";
 import Dashboard from "./features/dashboard/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import GuestRoute from "./components/GuestRoute";
 import AcceptInvite from "./features/invites/AcceptInvite";
+import Auth from "./features/auth/Auth";
 
 const router = createBrowserRouter([
   {
@@ -22,11 +20,7 @@ const router = createBrowserRouter([
       },
       {
         element: <GuestRoute />,
-        children: [
-          { index: true, element: <Home /> },
-          { path: "login", element: <Login /> },
-          { path: "register", element: <Register /> },
-        ],
+        children: [{ index: true, element: <Auth /> }],
       },
     ],
   },

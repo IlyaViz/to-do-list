@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate, useSearchParams } from "react-router";
+import toast from "react-hot-toast";
 import { acceptInvite } from "./invitesApi";
 import { formatError } from "../../utils/formatError";
 
@@ -18,16 +19,13 @@ const AcceptInvite = () => {
     onSuccess: () => {
       navigate("/dashboard");
     },
+    onError: (error) => {
+      toast.error(formatError(error, "Failed to accept invite"));
+    },
   });
 
   return (
     <div className="flex flex-col items-center justify-center h-screen">
-      {error && (
-        <p className="text-red-600">
-          {formatError(error, "Failed to accept invite")}
-        </p>
-      )}
-
       <button
         onClick={() => acceptInviteMut(token)}
         className="px-4 py-2 bg-blue-600 text-white rounded"

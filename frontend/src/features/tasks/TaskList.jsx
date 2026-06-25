@@ -36,8 +36,9 @@ const TaskList = () => {
             <ul>
               {tasks
                 .filter((t) => t.owner === user)
+                .filter((t) => t.parent_task === null)
                 .map((t) => (
-                  <TaskItem key={t.id} task={t} />
+                  <TaskItem key={t.id} task={t} allTasks={tasks} />
                 ))}
             </ul>
           </li>

@@ -1,19 +1,14 @@
-import { useNavigate } from "react-router";
 import { useMutation } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 import { register } from "./authApi";
 import { formatError, formatFieldErrors } from "../../utils/formatError";
 
 const Register = () => {
-  const navigate = useNavigate();
-
-  const {
-    mutate: registerMut,
-    isPending,
-    isError,
-    error,
-  } = useMutation({
+  const { mutate: registerMut, isPending } = useMutation({
     mutationFn: register,
-    onSuccess: () => navigate("/login"),
+    onError: (error) => {
+      toast.error(getError(error));
+    },
   });
 
   const handle = (e) => {
@@ -29,7 +24,7 @@ const Register = () => {
     });
   };
 
-  const getError = () => {
+  const getError = (error) => {
     if (error?.response?.data?.detail) {
       return <p>{formatError(error, "Registration failed")}</p>;
     }
@@ -41,11 +36,13 @@ const Register = () => {
     <form onSubmit={handle} className="p-6 max-w-md flex flex-col items-center">
       <h2 className="text-lg font-medium">Register</h2>
 
-      {isError && <p className="text-red-600 text-center whitespace-pre-line">{getError()}</p>}
-
       <label className="block mt-3">
         Username
-        <input name="username" required className="block mt-1 w-full border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+        <input
+          name="username"
+          required
+          className="block mt-1 w-full border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
       </label>
 
       <label className="block mt-3">

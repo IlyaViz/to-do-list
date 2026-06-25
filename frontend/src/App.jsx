@@ -1,5 +1,6 @@
 import { Outlet } from "react-router";
 import { useContext } from "react";
+import { Toaster } from "react-hot-toast";
 import { AuthContext } from "./context/AuthContext";
 import LogoutButton from "./features/auth/LogoutButton";
 import "./index.css";
@@ -18,6 +19,8 @@ const App = () => {
           </div>
         </nav>
       )}
+
+      <Toaster />
 
       <div className="flex justify-center">
         <Outlet />

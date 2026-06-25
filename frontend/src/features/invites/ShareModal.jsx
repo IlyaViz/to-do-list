@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 import { sendInvite } from "./invitesApi";
 import { formatError } from "../../utils/formatError";
 
@@ -16,6 +17,9 @@ const ShareModal = () => {
     mutationFn: sendInvite,
     onSuccess: () => {
       setEmail("");
+    },
+    onError: (error) => {
+      toast.error(formatError(error, "Failed to send invite"));
     },
   });
 
@@ -51,12 +55,6 @@ const ShareModal = () => {
       </form>
 
       {isSuccess && <p className="text-green-600 mt-2">Invitation sent</p>}
-
-      {isError && (
-        <p className="text-red-600 mt-2">
-          {formatError(error, "Failed to send invite")}
-        </p>
-      )}
     </div>
   );
 };

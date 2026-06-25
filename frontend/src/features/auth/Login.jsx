@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { useNavigate } from "react-router";
 import { useMutation } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 import { AuthContext } from "../../context/AuthContext";
 import { formatError } from "../../utils/formatError";
 
@@ -9,15 +10,13 @@ const Login = () => {
 
   const navigate = useNavigate();
 
-  const {
-    mutate: loginMutation,
-    isPending,
-    isError,
-    error,
-  } = useMutation({
+  const { mutate: loginMutation, isPending } = useMutation({
     mutationFn: login,
     onSuccess: () => {
       navigate("/dashboard");
+    },
+    onError: (error) => {
+      toast.error(formatError(error, "Login failed"));
     },
   });
 
@@ -35,10 +34,6 @@ const Login = () => {
   return (
     <form onSubmit={handle} className="p-6 max-w-md flex flex-col items-center">
       <h2 className="text-lg font-medium">Login</h2>
-
-      {isError && (
-        <p className="text-red-600">{formatError(error, "Login failed")}</p>
-      )}
 
       <label className="block mt-3">
         Username
