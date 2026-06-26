@@ -5,7 +5,7 @@ import { updateTask, deleteTask } from "./tasksApi";
 import { formatError } from "../../utils/formatError";
 import TaskForm from "./TaskForm";
 
-const TaskItem = ({ task, allTasks }) => {
+const TaskItem = ({ task, allTasks, depth }) => {
   const [isAddingSubtask, setIsAddingSubtask] = useState(false);
   const [isTaskEditing, setIsTaskEditing] = useState(false);
 
@@ -73,19 +73,19 @@ const TaskItem = ({ task, allTasks }) => {
 
     if (timeDiff < 0) {
       dateBadgeClass =
-        "text-red-600 text-xs font-bold bg-red-100 px-2 py-0.5 rounded";
+        "text-red-600 text-xs font-bold bg-red-100 px-2 py-0.5 rounded w-fit";
       dateLabel = "Overdue";
     } else if (timeDiff <= 86400000) {
       dateBadgeClass =
-        "text-orange-600 text-xs font-medium bg-orange-100 px-2 py-0.5 rounded";
+        "text-orange-600 text-xs font-medium bg-orange-100 px-2 py-0.5 rounded w-fit";
       dateLabel = "Due soon";
     }
   }
 
   return (
     <li className="flex flex-col py-1">
-      <div className="flex items-center justify-between w-full gap-4 bg-white p-3 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-        <div className="flex items-center gap-3 flex-1 min-w-0">
+      <div className="flex items-start justify-between w-full gap-4 bg-white p-3 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+        <div className="flex items-start gap-3 flex-1 pt-0.5">
           <input
             type="checkbox"
             checked={task.is_completed}
@@ -96,32 +96,33 @@ const TaskItem = ({ task, allTasks }) => {
               })
             }
             disabled={isTogglePending}
-            className="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer"
+            className="w-5 h-5 mt-0.5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer shrink-0"
           />
 
           {isTaskEditing ? (
-            <div className="flex flex-wrap gap-2 flex-1">
+            <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2 w-full min-w-0">
               <input
                 type="text"
                 defaultValue={task.title}
                 onKeyDown={(e) => e.key === "Enter" && onEditUnFocus(e)}
                 onBlur={onEditUnFocus}
-                className="flex-1 border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
                 autoFocus
               />
+
               <input
                 type="datetime-local"
                 defaultValue={taskDate && formatDateForInput(taskDate)}
                 onKeyDown={(e) => e.key === "Enter" && onEditUnFocus(e)}
                 onBlur={onEditUnFocus}
-                className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
             </div>
           ) : (
-            <div className="flex flex-col min-w-0 flex-1">
+            <div className="flex flex-col flex-1">
               <span
                 onClick={() => setIsTaskEditing(true)}
-                className={`cursor-pointer truncate font-medium ${
+                className={`cursor-pointer break-all font-medium leading-snug ${
                   task.is_completed
                     ? "line-through text-gray-400"
                     : "text-gray-800"
@@ -131,7 +132,7 @@ const TaskItem = ({ task, allTasks }) => {
               </span>
 
               {taskDate && (
-                <span className={`mt-1 w-fit inline-block ${dateBadgeClass}`}>
+                <span className={`mt-1.5 ${dateBadgeClass}`}>
                   {dateLabel}: {taskDate.toLocaleString()}
                 </span>
               )}
@@ -139,14 +140,16 @@ const TaskItem = ({ task, allTasks }) => {
           )}
         </div>
 
-        <div className="flex items-center gap-1 opacity-60 hover:opacity-100 transition-opacity">
-          <button
-            onClick={() => setIsAddingSubtask(!isAddingSubtask)}
-            className="p-1.5 text-gray-600 hover:bg-gray-100 rounded-md transition-colors font-bold text-lg leading-none"
-            title="Add subtask"
-          >
-            {isAddingSubtask ? "×" : "+"}
-          </button>
+        <div className="flex items-center gap-1 opacity-60 hover:opacity-100 transition-opacity shrink-0">
+          {depth < 2 && (
+            <button
+              onClick={() => setIsAddingSubtask(!isAddingSubtask)}
+              className="p-1.5 text-gray-600 hover:bg-gray-100 rounded-md transition-colors font-bold text-lg leading-none"
+              title="Add subtask"
+            >
+              {isAddingSubtask ? "×" : "+"}
+            </button>
+          )}
 
           <button
             onClick={remove}
@@ -161,16 +164,24 @@ const TaskItem = ({ task, allTasks }) => {
 
       {isAddingSubtask && (
         <div className="mt-2 ml-8">
-          <TaskForm parentId={task.id} />
+          <TaskForm
+            parentId={task.id}
+            onSuccessCallback={() => setIsAddingSubtask(false)}
+          />
         </div>
       )}
 
       {allTasks.filter((t) => t.parent_task === task.id).length > 0 && (
-        <ul className="mt-2 ml-6 pl-4 border-l-2 border-blue-200 space-y-2">
+        <ul className="mt-2 ml-3 sm:ml-6 pl-3 sm:pl-4 border-l-2 border-blue-200 space-y-2">
           {allTasks
             .filter((t) => t.parent_task === task.id)
             .map((subtask) => (
-              <TaskItem key={subtask.id} task={subtask} allTasks={allTasks} />
+              <TaskItem
+                key={subtask.id}
+                task={subtask}
+                allTasks={allTasks}
+                depth={depth + 1}
+              />
             ))}
         </ul>
       )}

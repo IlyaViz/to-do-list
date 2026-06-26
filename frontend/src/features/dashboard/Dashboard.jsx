@@ -10,8 +10,8 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-          <div>
+        <div className="flex flex-col items-center md:flex-row justify-between gap-4 mb-8">
+          <div className="text-center">
             <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
               Welcome back{user?.username ? `, ${user.username}` : ""}! 👋
             </h1>
@@ -20,7 +20,7 @@ const Dashboard = () => {
               Manage your tasks, collaborate, and stay productive.
             </p>
           </div>
-          
+
           <ShareModal />
         </div>
 

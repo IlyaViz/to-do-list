@@ -45,7 +45,7 @@ const TaskList = () => {
   return (
     <div className="mt-2">
       <div className="flex flex-wrap gap-4 mb-8 justify-between items-center pb-6 border-b border-gray-100">
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap justify-center">
           {["all", "active", "completed", "overdue"].map((f) => (
             <button
               key={f}
@@ -121,7 +121,7 @@ const TaskList = () => {
 
               <ul className="space-y-3">
                 {userRootTasks.map((t) => (
-                  <TaskItem key={t.id} task={t} allTasks={tasks} />
+                  <TaskItem key={t.id} task={t} allTasks={tasks} depth={0} />
                 ))}
               </ul>
             </li>
