@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from rest_framework.exceptions import NotFound
 from .models import Task, Invitation, SharedAccess
 from .serializers import TaskSerializer, InvitationSerializer
-from .services import create_invitation, accept_invitation
+from .services import create_invitation, accept_invitation, validate_task_depth
 
 
 class TaskViewSet(viewsets.ModelViewSet):
@@ -28,9 +28,51 @@ class TaskViewSet(viewsets.ModelViewSet):
             .order_by("is_completed", "due_at", "-created_at")
         )
 
-    def perform_create(self, serializer):
-        """Встановлює власника завдання при створенні."""
+    def create(self, request, *args, **kwargs):
+        """Створює нове завдання."""
 
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        parent_task = serializer.validated_data.get("parent_task")
+
+        try:
+            validate_task_depth(parent_task)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        self.perform_create(serializer)
+
+        headers = self.get_success_headers(serializer.data)
+
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )
+
+    def update(self, request, *args, **kwargs):
+        """Оновлює існуюче завдання."""
+
+        partial = kwargs.pop("partial", False)
+
+        instance = self.get_object()
+
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+
+        serializer.is_valid(raise_exception=True)
+
+        if "parent_task" in serializer.validated_data:
+            parent_task = serializer.validated_data.get("parent_task")
+
+            try:
+                validate_task_depth(parent_task, current_task_id=instance.id)
+            except Exception as e:
+                return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        self.perform_update(serializer)
+
+        return Response(serializer.data)
+
+    def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
 

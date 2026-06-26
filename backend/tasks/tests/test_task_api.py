@@ -145,3 +145,85 @@ class TaskAPITests(APITestCase):
             title="Майбутнє", owner=self.user1, due_at=future_time, is_completed=False
         )
         self.assertFalse(task_future.is_overdue)
+
+    def test_create_task_depth_limit_exceeded(self):
+        """Тест обмеження глибини вкладеності завдань."""
+
+        root_task = Task.objects.create(title="Root Task", owner=self.user1)
+
+        child_task = Task.objects.create(
+            title="Child Task", owner=self.user1, parent_task=root_task
+        )
+
+        grandchild_task = Task.objects.create(
+            title="Grandchild Task", owner=self.user1, parent_task=child_task
+        )
+
+        response = self.client1.post(
+            self.tasks_url,
+            {
+                "title": "Great Grandchild Task",
+                "owner": self.user1.id,
+                "parent_task": grandchild_task.id,
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_task_depth_limit_not_exceeded(self):
+
+        root_task = Task.objects.create(title="Root Task", owner=self.user1)
+
+        child_task = Task.objects.create(
+            title="Child Task", owner=self.user1, parent_task=root_task
+        )
+
+        response = self.client1.post(
+            self.tasks_url,
+            {
+                "title": "Grandchild Task",
+                "owner": self.user1.id,
+                "parent_task": child_task.id,
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_update_task_depth_limit_exceeded(self):
+        """Тест обмеження глибини вкладеності при оновленні завдання."""
+
+        root_task = Task.objects.create(title="Root Task", owner=self.user1)
+
+        child_task = Task.objects.create(
+            title="Child Task", owner=self.user1, parent_task=root_task
+        )
+
+        grandchild_task = Task.objects.create(
+            title="Grandchild Task", owner=self.user1, parent_task=child_task
+        )
+
+        response = self.client1.patch(
+            f"{self.tasks_url}{grandchild_task.id}/",
+            {"parent_task": grandchild_task.id},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_update_task_depth_limit_not_exceeded(self):
+
+        root_task = Task.objects.create(title="Root Task", owner=self.user1)
+
+        child_task = Task.objects.create(
+            title="Child Task", owner=self.user1, parent_task=root_task
+        )
+
+        response = self.client1.patch(
+            f"{self.tasks_url}{child_task.id}/",
+            {"parent_task": root_task.id},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
