@@ -1,6 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useContext, useState } from "react";
-import { getTasks } from "./tasksApi";
+import { getTasks, deleteSharedAccess } from "./tasksApi";
 import { AuthContext } from "../../context/AuthContext";
 import TaskItem from "./TaskItem";
 
@@ -9,6 +9,8 @@ const TaskList = () => {
   const [userFilter, setUserFilter] = useState("all");
 
   const { user: currentUser } = useContext(AuthContext);
+
+  const qc = useQueryClient();
 
   const {
     data: tasks = [],
@@ -19,10 +21,20 @@ const TaskList = () => {
     queryFn: getTasks,
   });
 
-  if (isLoading) return <p className="mt-4">Loading tasks…</p>;
+  const { mutate: leaveSharedMutate } = useMutation({
+    mutationFn: deleteSharedAccess,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["tasks"] });
+    },
+  });
 
-  if (isError)
-    return <p className="mt-4 text-red-600">Failed to load tasks.</p>;
+  const handleLeave = async (owner) => {
+    if (confirm("Are you sure you want to leave this task list?")) {
+      const ownerId = tasks.find((t) => t.owner === owner)?.owner_id;
+
+      leaveSharedMutate(ownerId);
+    }
+  };
 
   const allUniqueUsers = [...new Set(tasks.map((t) => t.owner))];
 
@@ -41,6 +53,11 @@ const TaskList = () => {
   });
 
   const uniqueTaskUsers = [...new Set(filteredTasks.map((t) => t.owner))];
+
+  if (isLoading) return <p className="mt-4">Loading tasks…</p>;
+
+  if (isError)
+    return <p className="mt-4 text-red-600">Failed to load tasks.</p>;
 
   return (
     <div className="mt-2">
@@ -117,6 +134,15 @@ const TaskList = () => {
                     ? "My Tasks"
                     : `${user}'s Tasks`}
                 </h3>
+
+                {currentUser.username !== user && (
+                  <button
+                    onClick={() => handleLeave(user)}
+                    className="ml-auto px-3 py-1.5 text-sm font-medium text-red-600 bg-red-50 rounded-md hover:bg-red-100 transition-colors"
+                  >
+                    Leave List
+                  </button>
+                )}
               </div>
 
               <ul className="space-y-3">

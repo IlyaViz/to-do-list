@@ -23,3 +23,9 @@ export const deleteTask = async (id) => {
   
   return resp.data;
 };
+
+export const deleteSharedAccess = async (ownerId) => {
+  const resp = await api.delete(`/shared-access/${ownerId}/`);
+
+  return resp.data;
+}
