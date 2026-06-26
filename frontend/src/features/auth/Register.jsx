@@ -9,6 +9,9 @@ const Register = () => {
     onError: (error) => {
       toast.error(getError(error));
     },
+    onSuccess: () => {
+      toast.success("Registration successful! You can now log in.");
+    },
   });
 
   const handle = (e) => {
