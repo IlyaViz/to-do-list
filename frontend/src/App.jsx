@@ -11,7 +11,7 @@ const App = () => {
   return (
     <main>
       {user && (
-        <nav className="bg-gray-800 p-2 text-white flex justify-end">
+        <nav className="bg-gray-800 p-2 text-white flex justify-end fixed left-0 right-0">
           <div className="flex items-center gap-4">
             {user.username}
 
