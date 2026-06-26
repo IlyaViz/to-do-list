@@ -79,7 +79,7 @@ const Register = () => {
         className="mt-4 px-3 py-2 bg-green-600 text-white"
         disabled={isPending}
       >
-        {isPending ? "Registering..." : "Register"}
+        {isPending ? "..." : "Register"}
       </button>
     </form>
   );

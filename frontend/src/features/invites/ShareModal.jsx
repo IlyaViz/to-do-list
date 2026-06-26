@@ -49,7 +49,7 @@ const ShareModal = () => {
             className="px-3 py-1 bg-blue-600 text-white"
             disabled={isPending}
           >
-            {isPending ? "Sending..." : "Send invite"}
+            {isPending ? "..." : "Send invite"}
           </button>
         </div>
       </form>

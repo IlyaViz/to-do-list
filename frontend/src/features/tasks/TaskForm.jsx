@@ -35,14 +35,14 @@ const TaskForm = ({ parentId }) => {
   return (
     <form
       onSubmit={submit}
-      className={`flex flex-col gap-2 ${parentId ? "ml-4 text-xs" : ""}`}
+      className={`flex flex-col gap-2 ${parentId ? "text-sm" : ""}`}
     >
-      <div className="flex-1 flex gap-2">
+      <div className="flex flex-wrap items-center gap-3">
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="New task"
-          className="flex-1 border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          placeholder="What needs to be done?"
+          className="flex-1 min-w-[200px] border border-gray-300 rounded-lg px-3 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition-shadow"
           required
           disabled={isPending}
         />
@@ -51,15 +51,19 @@ const TaskForm = ({ parentId }) => {
           type="datetime-local"
           value={dueAt}
           onChange={(e) => setDueAt(e.target.value)}
-          className="border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="border border-gray-300 rounded-lg px-3 py-2 text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition-shadow"
           disabled={isPending}
         />
 
         <button
-          className={`px-3 py-1 text-white  ${inputIsValid ? "bg-blue-500 hover:bg-blue-600" : "bg-gray-400 cursor-not-allowed"} rounded`}
+          className={`px-5 py-2 font-medium text-white rounded-lg shadow-sm transition-colors ${
+            inputIsValid
+              ? "bg-blue-600 hover:bg-blue-700"
+              : "bg-gray-300 cursor-not-allowed"
+          }`}
           disabled={isPending || !inputIsValid}
         >
-          {isPending ? "Adding..." : "Add"}
+          {isPending ? "..." : parentId ? "Add Subtask" : "Add Task"}
         </button>
       </div>
     </form>

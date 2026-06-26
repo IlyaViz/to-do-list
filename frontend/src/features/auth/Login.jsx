@@ -59,7 +59,7 @@ const Login = () => {
         className="mt-4 px-3 py-2 bg-blue-600 text-white"
         disabled={isPending}
       >
-        {isPending ? "Signing in..." : "Sign in"}
+        {isPending ? "..." : "Sign in"}
       </button>
     </form>
   );

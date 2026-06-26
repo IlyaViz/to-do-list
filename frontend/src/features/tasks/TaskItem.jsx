@@ -63,11 +63,29 @@ const TaskItem = ({ task, allTasks }) => {
   };
 
   const taskDate = task.due_at ? new Date(task.due_at) : null;
+  const now = new Date();
+
+  let dateBadgeClass = "text-gray-500 text-xs";
+  let dateLabel = "Due";
+
+  if (taskDate && !task.is_completed) {
+    const timeDiff = taskDate.getTime() - now.getTime();
+
+    if (timeDiff < 0) {
+      dateBadgeClass =
+        "text-red-600 text-xs font-bold bg-red-100 px-2 py-0.5 rounded";
+      dateLabel = "Overdue";
+    } else if (timeDiff <= 86400000) {
+      dateBadgeClass =
+        "text-orange-600 text-xs font-medium bg-orange-100 px-2 py-0.5 rounded";
+      dateLabel = "Due soon";
+    }
+  }
 
   return (
-    <li className="flex flex-col items-center justify-between py-2">
-      <div className="flex items-center justify-between w-full gap-2">
-        <div className="flex items-center gap-2">
+    <li className="flex flex-col py-1">
+      <div className="flex items-center justify-between w-full gap-4 bg-white p-3 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
           <input
             type="checkbox"
             checked={task.is_completed}
@@ -78,77 +96,84 @@ const TaskItem = ({ task, allTasks }) => {
               })
             }
             disabled={isTogglePending}
+            className="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer"
           />
 
           {isTaskEditing ? (
-            <>
+            <div className="flex flex-wrap gap-2 flex-1">
               <input
                 type="text"
                 defaultValue={task.title}
                 onKeyDown={(e) => e.key === "Enter" && onEditUnFocus(e)}
                 onBlur={onEditUnFocus}
-                className="border border-gray-300 rounded px-1 py-0.5 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="flex-1 border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                autoFocus
               />
-
               <input
                 type="datetime-local"
                 defaultValue={taskDate && formatDateForInput(taskDate)}
                 onKeyDown={(e) => e.key === "Enter" && onEditUnFocus(e)}
                 onBlur={onEditUnFocus}
-                className="border border-gray-300 rounded px-1 py-0.5 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
-            </>
+            </div>
           ) : (
-            <>
+            <div className="flex flex-col min-w-0 flex-1">
               <span
                 onClick={() => setIsTaskEditing(true)}
-                className="cursor-pointer inline-block max-w-[125px] truncate"
+                className={`cursor-pointer truncate font-medium ${
+                  task.is_completed
+                    ? "line-through text-gray-400"
+                    : "text-gray-800"
+                }`}
               >
                 {task.title}
               </span>
 
               {taskDate && (
-                <span className="text-gray-500 text-xs">
-                  Due: {taskDate.toLocaleString()}
+                <span className={`mt-1 w-fit inline-block ${dateBadgeClass}`}>
+                  {dateLabel}: {taskDate.toLocaleString()}
                 </span>
               )}
-            </>
+            </div>
           )}
         </div>
 
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setIsAddingSubtask(!isAddingSubtask)}
-              className="text-gray-400 hover:text-blue-600 text-xl leading-none"
-            >
-              {isAddingSubtask ? "×" : "+"}
-            </button>
+        <div className="flex items-center gap-1 opacity-60 hover:opacity-100 transition-opacity">
+          <button
+            onClick={() => setIsAddingSubtask(!isAddingSubtask)}
+            className="p-1.5 text-gray-600 hover:bg-gray-100 rounded-md transition-colors font-bold text-lg leading-none"
+            title="Add subtask"
+          >
+            {isAddingSubtask ? "×" : "+"}
+          </button>
 
-            <button
-              onClick={remove}
-              className="text-red-400 hover:text-red-600 text-sm"
-              disabled={isDeletePending}
-            >
-              {isDeletePending ? "Deleting..." : "Delete"}
-            </button>
-          </div>
+          <button
+            onClick={remove}
+            className="p-1.5 text-red-500 hover:bg-red-50 rounded-md transition-colors"
+            disabled={isDeletePending}
+            title="Delete task"
+          >
+            🗑
+          </button>
         </div>
       </div>
 
       {isAddingSubtask && (
-        <div className="mt-2 w-full">
+        <div className="mt-2 ml-8">
           <TaskForm parentId={task.id} />
         </div>
       )}
 
-      <ul className="mt-2 w-full ml-4 border-l border-gray-300 pl-4">
-        {allTasks
-          .filter((t) => t.parent_task === task.id)
-          .map((subtask) => (
-            <TaskItem key={subtask.id} task={subtask} allTasks={allTasks} />
-          ))}
-      </ul>
+      {allTasks.filter((t) => t.parent_task === task.id).length > 0 && (
+        <ul className="mt-2 ml-6 pl-4 border-l-2 border-blue-200 space-y-2">
+          {allTasks
+            .filter((t) => t.parent_task === task.id)
+            .map((subtask) => (
+              <TaskItem key={subtask.id} task={subtask} allTasks={allTasks} />
+            ))}
+        </ul>
+      )}
     </li>
   );
 };
