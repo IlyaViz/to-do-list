@@ -14,7 +14,6 @@ Based on the feedback for the MVP, this second iteration focuses on improving th
 * **Visual Deadlines:** Tasks with `due_at` dates now feature dynamic color indicators (e.g., highlighting overdue tasks in red) to help users prioritize effectively.
 * **Empty States & Feedback:** Added visually appealing empty states for empty lists and toast notifications for user actions (e.g., "Task created", "Successfully left the group").
 * **Client-Side Filtering:** Added intuitive tab controls (e.g., All, Active, Completed, Expired) to filter tasks on the client side without additional API calls.
-* **Toast:** Added toast instead of displaying text, especially for errors. 
 
 ## 4. Technical Changes (Backend Contract Update)
 * **Database:** Updated the `Task` model to include `parent_task = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='subtasks')`.

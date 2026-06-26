@@ -6,6 +6,7 @@ import { formatError } from "../../utils/formatError";
 
 const TaskForm = ({ parentId }) => {
   const [title, setTitle] = useState("");
+  const [dueAt, setDueAt] = useState("");
 
   const qc = useQueryClient();
 
@@ -13,6 +14,7 @@ const TaskForm = ({ parentId }) => {
     mutationFn: createTask,
     onSuccess: () => {
       setTitle("");
+      setDueAt("");
       qc.invalidateQueries({ queryKey: ["tasks"] });
     },
     onError: (error) => {
@@ -23,10 +25,12 @@ const TaskForm = ({ parentId }) => {
   const submit = (e) => {
     e.preventDefault();
 
-    if (!title.trim()) return;
+    const formattedDueAt = dueAt ? new Date(dueAt).toISOString() : null;
 
-    createMut({ title, parent_task: parentId });
+    createMut({ title, due_at: formattedDueAt, parent_task: parentId });
   };
+
+  const inputIsValid = title.trim() !== "";
 
   return (
     <form
@@ -38,13 +42,22 @@ const TaskForm = ({ parentId }) => {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="New task"
-          className="flex-1 border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-green-400"
+          className="flex-1 border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          required
+          disabled={isPending}
+        />
+
+        <input
+          type="datetime-local"
+          value={dueAt}
+          onChange={(e) => setDueAt(e.target.value)}
+          className="border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-400"
           disabled={isPending}
         />
 
         <button
-          className="px-3 py-1 bg-green-600 text-white"
-          disabled={isPending}
+          className={`px-3 py-1 text-white  ${inputIsValid ? "bg-blue-500 hover:bg-blue-600" : "bg-gray-400 cursor-not-allowed"} rounded`}
+          disabled={isPending || !inputIsValid}
         >
           {isPending ? "Adding..." : "Add"}
         </button>

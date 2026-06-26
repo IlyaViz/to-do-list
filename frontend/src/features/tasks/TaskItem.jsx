@@ -33,15 +33,36 @@ const TaskItem = ({ task, allTasks }) => {
     deleteMutate(task.id);
   };
 
-  const onTitleUnFocus = (e) => {
-    const newTitle = e.target.value.trim();
+  const onEditUnFocus = (e) => {
+    const isTitleChange = e.target.type === "text";
+    const isDueDateChange = e.target.type === "datetime-local";
 
-    if (newTitle && newTitle !== task.title) {
-      updateMutate({ id: task.id, payload: { title: newTitle } });
+    if (isTitleChange && e.target.value.trim() !== "") {
+      updateMutate({ id: task.id, payload: { title: e.target.value.trim() } });
+    }
+
+    if (isDueDateChange) {
+      const newDueDate = e.target.value
+        ? new Date(e.target.value).toISOString()
+        : null;
+
+      updateMutate({ id: task.id, payload: { due_at: newDueDate } });
     }
 
     setIsTaskEditing(false);
   };
+
+  const formatDateForInput = (dateObj) => {
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+    const day = String(dateObj.getDate()).padStart(2, "0");
+    const hours = String(dateObj.getHours()).padStart(2, "0");
+    const minutes = String(dateObj.getMinutes()).padStart(2, "0");
+
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
+  const taskDate = task.due_at ? new Date(task.due_at) : null;
 
   return (
     <li className="flex flex-col items-center justify-between py-2">
@@ -60,20 +81,38 @@ const TaskItem = ({ task, allTasks }) => {
           />
 
           {isTaskEditing ? (
-            <input
-              type="text"
-              defaultValue={task.title}
-              onBlur={onTitleUnFocus}
-              onKeyDown={(e) => e.key === "Enter" && e.target.blur()}
-              className="border border-gray-300 rounded px-1 py-0.5 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
+            <>
+              <input
+                type="text"
+                defaultValue={task.title}
+                onKeyDown={(e) => e.key === "Enter" && onEditUnFocus(e)}
+                onBlur={onEditUnFocus}
+                className="border border-gray-300 rounded px-1 py-0.5 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+
+              <input
+                type="datetime-local"
+                defaultValue={taskDate && formatDateForInput(taskDate)}
+                onKeyDown={(e) => e.key === "Enter" && onEditUnFocus(e)}
+                onBlur={onEditUnFocus}
+                className="border border-gray-300 rounded px-1 py-0.5 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+            </>
           ) : (
-            <span
-              onClick={() => setIsTaskEditing(true)}
-              className="cursor-pointer inline-block max-w-[125px] truncate"
-            >
-              {task.title}
-            </span>
+            <>
+              <span
+                onClick={() => setIsTaskEditing(true)}
+                className="cursor-pointer inline-block max-w-[125px] truncate"
+              >
+                {task.title}
+              </span>
+
+              {taskDate && (
+                <span className="text-gray-500 text-xs">
+                  Due: {taskDate.toLocaleString()}
+                </span>
+              )}
+            </>
           )}
         </div>
 
@@ -82,7 +121,6 @@ const TaskItem = ({ task, allTasks }) => {
             <button
               onClick={() => setIsAddingSubtask(!isAddingSubtask)}
               className="text-gray-400 hover:text-blue-600 text-xl leading-none"
-              title="Додати підзадачу"
             >
               {isAddingSubtask ? "×" : "+"}
             </button>
@@ -92,7 +130,7 @@ const TaskItem = ({ task, allTasks }) => {
               className="text-red-400 hover:text-red-600 text-sm"
               disabled={isDeletePending}
             >
-              {isDeletePending ? "..." : "Видалити"}
+              {isDeletePending ? "Deleting..." : "Delete"}
             </button>
           </div>
         </div>
