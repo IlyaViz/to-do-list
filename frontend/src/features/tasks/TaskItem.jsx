@@ -107,7 +107,6 @@ const TaskItem = ({ task, allTasks, depth }) => {
                 onKeyDown={(e) => e.key === "Enter" && onEditUnFocus(e)}
                 onBlur={onEditUnFocus}
                 className="border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-                autoFocus
               />
 
               <input
